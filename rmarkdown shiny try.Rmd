@@ -1,0 +1,253 @@
+---
+title: "Find your ideal city"
+output: flexdashboard::flex_dashboard
+vertical_layout: scroll
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+library(datasets)
+library(DT)
+data(faithful)
+```
+
+Sidebar {.sidebar}{data-width=250}
+-----------------------------------------------------------------------
+
+```{r}
+library(readxl)
+data = read_xlsx('citi.xlsx')
+
+state = unique(data$STATE)
+state[51] = 'All Include'
+max_total_emp = 30000
+max_cover_rate = 100
+max_ann_sal = 150000
+max_hour_sal = 60
+max_living_wage = 15
+max_tax_rate = 9
+max_rent_rate = 120
+max_edu_rate = 100
+max_enter_rate = 70
+max_cri_rate = 160
+fluidRow(column(width =8,
+            selectInput("job_title", label = "Position:",
+            choices = c('Software Engineer', 'Financial Manager', 'Accountant','Social worker','Human Resource Manager'), selected = NA)
+                ),
+         conditionalPanel(condition = "input.total_ck||input.asal_ck||input.hsal_ck||input.livwage_ck||input.tax_ck",
+         column(width = 4,
+                helpText('Weight'))
+         ))
+fluidRow(column(width =8,
+            checkboxInput("state_ck","State:", value = FALSE, width = NULL)),
+         conditionalPanel(condition = "input.state_ck",   
+          column(width = 8,
+            selectInput("state", label = NULL ,
+            choices = state, selected = state[51])
+        )))
+fluidRow(column(width =8,
+        checkboxInput("total_ck","Total employment:", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.total_ck",
+        column(width = 8,
+            sliderInput("tot_emp",label = NULL,
+            min = 0, max = max_total_emp, value = c(0,max_total_emp), step = 10,ticks = FALSE)
+        ),
+        column(width = 3, sliderInput("wt_total", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+        checkboxInput("cov_ck","Employment density(per 1000):", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.cov_ck",
+        column(width = 8,
+            sliderInput("cov_rate",label = NULL,
+            min = 0, max =max_cover_rate, value = c(0,max_cover_rate), step = 1)
+        ),
+        column(width = 3, sliderInput("wt_cov", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("asal_ck","Annual Salary:", value = FALSE, width = NULL)),
+          conditionalPanel(condition = "input.asal_ck",
+        column(width =8,
+            sliderInput("asalary", label = NULL,
+            min = 0, max = max_ann_sal, value = c(0,max_ann_sal), step = 5000)
+        ),
+        column(width = 3, sliderInput("wt_asal", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("hsal_ck","Hourly Salary:", value = FALSE, width = NULL)),
+          conditionalPanel(condition = "input.hsal_ck",
+        column(width =8,
+            sliderInput("hsalary", label = NULL,
+            min = 0, max = max_hour_sal, value = c(0,max_hour_sal), step = 1)
+        ),
+        column(width = 3, sliderInput("wt_hsal", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("livewage_ck","Living Wage:(1 Adult per hour)", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.livewage_ck",
+        column(width =8,
+            sliderInput("living", label = NULL,
+            min = 0, max = max_living_wage, value = c(0,max_living_wage), step = 0.5)
+        ),
+        column(width = 3, sliderInput("wt_livewage", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("tax_ck","Tax Rate:(%)", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.tax_ck",
+        column(width =8,
+            sliderInput("tax", label = NULL,
+            min = 0, max = max_tax_rate, value = c(0,max_tax_rate), step = 0.0001)
+        ),
+        column(width = 3, sliderInput("wt_tax", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("rent_ck","Rent Rate:(%)", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.rent_ck",
+        column(width =8,
+            sliderInput("rent", label = NULL,
+            min = 0, max = max_rent_rate, value = c(0,max_rent_rate), step = 0.0001)
+        ),
+        column(width = 3, sliderInput("wt_rent", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("cri_ck","Criminal Rate:(per 1000)", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.cri_ck",
+        column(width =8,
+            sliderInput("cri", label = NULL,
+            min = 0, max = max_cri_rate, value = c(0,max_cri_rate), step = 1)
+        ),
+        column(width = 3, sliderInput("wt_cri", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("edu_ck","Education:", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.edu_ck",
+        column(width =8,
+            sliderInput("edu", label = NULL,
+            min = 0, max = max_edu_rate, value = c(0,max_edu_rate), step = 1)
+        ),
+        column(width = 3, sliderInput("wt_edu", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+fluidRow(column(width =8,
+          checkboxInput("enter_ck","Entertainment:", value = FALSE, width = NULL)),
+        conditionalPanel(condition = "input.enter_ck",
+        column(width =8,
+            sliderInput("enter", label = NULL,
+            min = 0, max = max_enter_rate, value = c(0,max_enter_rate), step = 1)
+        ),
+        column(width = 3, sliderInput("wt_enter", label = NULL,min = 0, max = 100, value = 0, step = 0.1,ticks = FALSE))
+        ))
+                                      
+```
+
+
+Column {.tabset .tabset-fad data-width=900}
+-------------------------------------
+
+### Datatable
+
+```{r}
+dataset <- reactive({
+  data = data[data$`Job Title` == input$job_title,]
+  
+  if (input$state_ck & input$state != state[51]){
+    data = data[data$STATE == input$state,]
+  }
+  if(input$total_ck){
+    data = data[data$`Total Employment` > input$tot_emp[1] & data$`Total Employment` < input$tot_emp[2],]
+  }else{
+    data = data[data$`Total Employment` > 0 & data$`Total Employment` < max_total_emp,]
+  }
+  if(input$cov_ck){
+    data = data[data$`Jobs (per 1000)` > input$cov_rate[1] & data$`Jobs (per 1000)` < input$cov_rate[2],]
+  }else{
+    data = data[data$`Jobs (per 1000)` > 0 & data$`Jobs (per 1000)` < max_cover_rate,]
+  }
+  if(input$asal_ck){
+    data = data[data$`Annual salary` > input$asalary[1] & data$`Annual salary` < input$asalary[2],]
+  }else{
+    data = data[data$`Annual salary` > 0 & data$`Annual salary` < max_ann_sal,]
+  }
+  if(input$hsal_ck){
+    data = data[data$`Hourly salary` > input$hsalary[1] & data$`Hourly salary` < input$hsalary[2],]
+  }else{
+    data = data[data$`Hourly salary` > 0 & data$`Hourly salary` < max_hour_sal,]
+  }
+  if(input$livewage_ck){
+    data = data[data$`Living wage(1 adult)` > input$living[1] & data$`Living wage(1 adult)` < input$living[2],]
+  }else{
+    data = data[data$`Living wage(1 adult)` > 0 & data$`Living wage(1 adult)` < max_living_wage,]
+  }
+  if(input$tax_ck){
+    data = data[data$`Tax Rate` > input$tax[1] & data$`Tax Rate` < input$tax[2],]
+  }else{
+    data = data[data$`Tax Rate` > 0 & data$`Tax Rate` < max_tax_rate,]
+  }
+  if(input$rent_ck){
+    data = data[data$`Rental Index` > input$rent[1] & data$`Rental Index` < input$rent[2],]
+  }else{
+    data = data[data$`Rental Index` > 0 & data$`Rental Index` < max_rent_rate,]
+  }
+  if(input$cri_ck){
+    data = data[data$`Criminal Rate` > input$cri[1] & data$`Criminal Rate` < input$cri[2],]
+  }else{
+    data = data[data$`Criminal Rate` > 0 & data$`Criminal Rate` < max_cri_rate,]
+  }
+  if(input$edu_ck){
+    data = data[data$Education > input$edu[1] & data$Education< input$edu[2],]
+  }else{
+    data = data[data$Education > 0 & data$Education < max_edu_rate,]
+  }
+  if(input$enter_ck){
+    data = data[data$Entertainment > input$enter[1] & data$Entertainment< input$enter[2],]
+  }else{
+    data = data[data$Entertainment > 0 & data$Entertainment < max_enter_rate,]
+  }
+  
+  # box_vec = c(input$total_ck, input$cov_ck, input$asal_ck, input$hsal_ck,
+  #             input$livewage_ck,input$tax_ck,input$rent_ck,input$cri_ck,input$edu_ck,input$enter_ck)                                                                 
+  # colskeep = which(box_vec)
+  # wt_vector = c(input$wt_total,input$wt_cov,input$wt_asal,input$wt_hsal,input$wt_livewage,input$wt_tax,
+  #               input$wt_rent,input$wt_cri,input$wt_edu,input$wt_enter)
+  # wt = wt_vector[colskeep]
+  # score = 0
+  # for (i in 1:length(colskeep)){
+  #   score = score + wt[i] * data[,i]
+  # }
+  
+  data = data[,-1]
+})
+
+renderDataTable(datatable({
+   dataset()
+    },
+    options = list(lengthMenu = c(5, 10,15), pageLength = 10))
+)
+```
+
+### Chart
+
+```{r}
+fluidRow(column(width =8,
+            selectInput("job_title", label = "Chart Type",
+            choices = c('Bar Chart', 'Pie Chart', 'Histogram','Radio Chart','Scatter Plot','Area'), selected = NA)
+                ),
+         column(width =8,
+            selectInput("job_title", label = "Color",
+            choices = c('Rental', 'Hourly Salary', 'Annual Salary','Education','Life Cost'), selected = NA)
+                ))
+```
+
+### Map
+
+```{r}
+fluidRow(column(width =8,
+            selectInput("job_title", label = "Filter",
+            choices = c('Rental', 'Hourly Salary', 'Annual Salary','Education','Life Cost'), selected = NA)
+                ),
+         column(width =8,
+            selectInput("job_title", label = "Color",
+            choices = c('State', 'City', 'Annual Salary','Education','Life Cost'), selected = NA)
+                ))
+
+
+```
